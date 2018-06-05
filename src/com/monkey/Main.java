@@ -9,6 +9,7 @@ public class Main {
         }
         arr.add(1, 100);
         arr.addFirst(-1);
+
         System.out.println(arr);
     }
 }
