@@ -1,12 +1,12 @@
 package com.monkey;
 
-public class Array {
+public class Array<E> {
 
-    private int[] data;
+    private E[] data;
     private int size;//实际大小
 
     public Array(int capacity) {
-        data = new int[capacity];
+        data = (E[]) new Object[capacity];//泛型的初始化
         size = 0;
     }
 
@@ -26,21 +26,21 @@ public class Array {
         return size == 0;
     }
 
-    public void addFirst(int value) {
-        add(0, value);
+    public void addFirst(E e) {
+        add(0, e);
     }
 
-    public void addLast(int value) {
-        add(size, value);
+    public void addLast(E e) {
+        add(size, e);
     }
 
     /**
      * 插入元素
      *
      * @param index 指定位置
-     * @param value
+     * @param e
      */
-    public void add(int index, int value) {
+    public void add(int index, E e) {
         if (size == data.length) {
             throw new IllegalArgumentException("Add failed,array is full.");
         }
@@ -50,7 +50,7 @@ public class Array {
         for (int i = size - 1; i >= index; i--) {
             data[i + 1] = data[i];//index之后的元素向后移一位
         }
-        data[index] = value;
+        data[index] = e;
         size++;
     }
 
@@ -60,49 +60,50 @@ public class Array {
      * @param index 指定位置
      * @return
      */
-    public int remove(int index) {
+    public E remove(int index) {
         if (index < 0 || index > size) {
             throw new IllegalArgumentException("Remove failed,require index >=0 and index <= size.");
         }
-        int value = data[index];
+        E e = data[index];
         for (int i = index; i < size; i++) {
             data[i] = data[i + 1];
         }
         size--;
-        return value;
+        data[size] = null;//loitering objects 闲散游荡的对象，可以置空回收，但不代表内存泄漏memory leak
+        return e;
     }
 
-    public int removeFirst() {
+    public E removeFirst() {
         return remove(0);
     }
 
-    public int removeLast() {
+    public E removeLast() {
         return remove(size - 1);
     }
 
-    public int get(int index) {
+    public E get(int index) {
         if (index < 0 || index >= size) {
             throw new IllegalArgumentException("Get failed,index is illegal.");
         }
         return data[index];
     }
 
-    public void set(int index, int value) {
+    public void set(int index, E e) {
         if (index < 0 || index >= size) {
             throw new IllegalArgumentException("Get failed,index is illegal.");
         }
-        data[index] = value;
+        data[index] = e;
     }
 
     /**
-     * 查找数组中是否有元素value
+     * 查找数组中是否有元素e
      *
-     * @param value
+     * @param e
      * @return
      */
-    public boolean contains(int value) {
+    public boolean contains(E e) {
         for (int i = 0; i < size; i++) {
-            if (data[i] == value) {
+            if (data[i].equals(e)) {
                 return true;
             }
         }
@@ -110,14 +111,14 @@ public class Array {
     }
 
     /**
-     * 查找数组中元素value所在的索引，不存在则返回-1
+     * 查找数组中元素e所在的索引，不存在则返回-1
      *
-     * @param value
+     * @param e
      * @return
      */
-    public int find(int value) {
+    public int find(E e) {
         for (int i = 0; i < size; i++) {
-            if (data[i] == value) {
+            if (data[i].equals(e)) {
                 return i;
             }
         }
