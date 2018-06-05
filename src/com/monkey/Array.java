@@ -44,7 +44,7 @@ public class Array {
         for (int i = size - 1; i >= index; i--) {
             data[i + 1] = data[i];
         }
-        data[size] = value;
+        data[index] = value;
         size++;
     }
 
