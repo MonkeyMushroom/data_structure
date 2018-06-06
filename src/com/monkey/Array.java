@@ -41,11 +41,11 @@ public class Array<E> {
      * @param e
      */
     public void add(int index, E e) {
-        if (size == data.length) {
-            throw new IllegalArgumentException("Add failed,array is full.");
-        }
         if (index < 0 || index > size) {
             throw new IllegalArgumentException("Add failed,require index >=0 and index <= size.");
+        }
+        if (size == data.length) {//元素加满了，扩容
+            resize(2 * data.length);
         }
         for (int i = size - 1; i >= index; i--) {
             data[i + 1] = data[i];//index之后的元素向后移一位
@@ -65,11 +65,14 @@ public class Array<E> {
             throw new IllegalArgumentException("Remove failed,require index >=0 and index <= size.");
         }
         E e = data[index];
-        for (int i = index; i < size; i++) {
+        for (int i = index; i < size - 1; i++) {
             data[i] = data[i + 1];
         }
         size--;
         data[size] = null;//loitering objects 闲散游荡的对象，可以置空回收，但不代表内存泄漏memory leak
+        if (size == data.length / 2) {//删除到一半的时候，缩小空间
+            resize(data.length / 2);
+        }
         return e;
     }
 
@@ -79,6 +82,19 @@ public class Array<E> {
 
     public E removeLast() {
         return remove(size - 1);
+    }
+
+    /**
+     * 动态调整空间大小
+     *
+     * @param newCapacity
+     */
+    private void resize(int newCapacity) {
+        E[] newData = (E[]) new Object[newCapacity];
+        for (int i = 0; i < size; i++) {
+            newData[i] = data[i];
+        }
+        data = newData;
     }
 
     public E get(int index) {
