@@ -26,16 +26,16 @@ public class Array<E> {
         return size == 0;
     }
 
-    public void addFirst(E e) {
+    public void addFirst(E e) {//  O(n)
         add(0, e);
     }
 
-    public void addLast(E e) {
+    public void addLast(E e) {//  O(1)
         add(size, e);
     }
 
     /**
-     * 插入元素
+     * 插入元素  O(n/2) = O(n)
      *
      * @param index 指定位置
      * @param e
@@ -55,7 +55,7 @@ public class Array<E> {
     }
 
     /**
-     * 删除元素，并返回删除的元素
+     * 删除元素，并返回删除的元素  O(n/2) = O(n)
      *
      * @param index 指定位置
      * @return
@@ -70,22 +70,22 @@ public class Array<E> {
         }
         size--;
         data[size] = null;//loitering objects 闲散游荡的对象，可以置空回收，但不代表内存泄漏memory leak
-        if (size == data.length / 2) {//删除到一半的时候，缩小空间
+        if (size == data.length / 4 && data.length / 2 != 0) {//元素个数到总容量1/4时，缩小一半空间，防止复杂度震荡
             resize(data.length / 2);
         }
         return e;
     }
 
-    public E removeFirst() {
+    public E removeFirst() {//  O(n)
         return remove(0);
     }
 
-    public E removeLast() {
+    public E removeLast() {//  O(1)
         return remove(size - 1);
     }
 
     /**
-     * 动态调整空间大小
+     * 动态调整空间大小  O(n)
      *
      * @param newCapacity
      */
@@ -97,14 +97,14 @@ public class Array<E> {
         data = newData;
     }
 
-    public E get(int index) {
+    public E get(int index) {//  O(1)
         if (index < 0 || index >= size) {
             throw new IllegalArgumentException("Get failed,index is illegal.");
         }
         return data[index];
     }
 
-    public void set(int index, E e) {
+    public void set(int index, E e) {//  O(1)
         if (index < 0 || index >= size) {
             throw new IllegalArgumentException("Get failed,index is illegal.");
         }
@@ -112,7 +112,7 @@ public class Array<E> {
     }
 
     /**
-     * 查找数组中是否有元素e
+     * 查找数组中是否有元素e  O(n)
      *
      * @param e
      * @return
@@ -127,7 +127,7 @@ public class Array<E> {
     }
 
     /**
-     * 查找数组中元素e所在的索引，不存在则返回-1
+     * 查找数组中元素e所在的索引，不存在则返回-1  O(n)
      *
      * @param e
      * @return
