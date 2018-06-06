@@ -1,4 +1,4 @@
-package com.monkey;
+package com.monkey.array;
 
 public class Main {
 

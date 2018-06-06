@@ -1,5 +1,8 @@
-package com.monkey;
+package com.monkey.array;
 
+/**
+ * 增删改查，支持泛型，动态扩容缩容
+ */
 public class Array<E> {
 
     private E[] data;
@@ -66,7 +69,7 @@ public class Array<E> {
         }
         E e = data[index];
         for (int i = index; i < size - 1; i++) {
-            data[i] = data[i + 1];
+            data[i] = data[i + 1];//向前一位赋值
         }
         size--;
         data[size] = null;//loitering objects 闲散游荡的对象，可以置空回收，但不代表内存泄漏memory leak
