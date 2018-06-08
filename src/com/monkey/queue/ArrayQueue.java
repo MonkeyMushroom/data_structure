@@ -30,12 +30,12 @@ public class ArrayQueue<E> implements Queue<E> {
 
     @Override
     public void enqueue(E e) {
-        array.addLast(e);
+        array.addLast(e);//队尾入队
     }
 
     @Override
     public E dequeue() {
-        return array.removeFirst();
+        return array.removeFirst();//队首出队
     }
 
     @Override
