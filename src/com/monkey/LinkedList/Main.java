@@ -2,14 +2,14 @@ package com.monkey.LinkedList;
 
 public class Main {
     public static void main(String[] args) {
-        LinkedList<Integer> linkedList = new LinkedList<>();
-        for (int i = 0; i < 5; i++) {
-            linkedList.addFirst(i);
+        LinkedListQueue<Integer> queue = new LinkedListQueue<>();
+        for (int i = 0; i < 10; i++) {
+            queue.enqueue(i);
+            System.out.println(queue);
+            if (i % 3 == 2) {
+                queue.dequeue();
+                System.out.println(queue);
+            }
         }
-        System.out.println(linkedList.toString());
-        for (int i = 0; i < 3; i++) {
-            linkedList.removeFirst();
-        }
-        System.out.println(linkedList.toString());
     }
 }
