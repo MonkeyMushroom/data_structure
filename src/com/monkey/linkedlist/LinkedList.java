@@ -1,4 +1,4 @@
-package com.monkey.LinkedList;
+package com.monkey.linkedlist;
 
 public class LinkedList<E> {
 
