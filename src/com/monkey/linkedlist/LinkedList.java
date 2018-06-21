@@ -44,7 +44,7 @@ public class LinkedList<E> {
     /**
      * 在链表的index位置添加新的元素e
      */
-    public void add(int index, E e) {
+    public void add(int index, E e) {// O(n)
         if (index < 0 || index > size) {
             throw new IllegalArgumentException("Add failed. Illegal index.");
         }
@@ -59,15 +59,15 @@ public class LinkedList<E> {
         size++;
     }
 
-    public void addFirst(E e) {
+    public void addFirst(E e) {// O(1)
         add(0, e);
     }
 
-    public void addLast(E e) {
+    public void addLast(E e) {// O(n)
         add(size, e);
     }
 
-    public E get(int index) {
+    public E get(int index) {// O(n)
         if (index < 0 && index >= size) {
             throw new IllegalArgumentException("Get failed,illegal index.");
         }
@@ -78,15 +78,15 @@ public class LinkedList<E> {
         return cur.e;
     }
 
-    public E getFirst() {
+    public E getFirst() {// O(1)
         return get(0);
     }
 
-    public E getLast() {
+    public E getLast() {// O(n)
         return get(size - 1);
     }
 
-    public void set(int index, E e) {
+    public void set(int index, E e) {// O(n)
         if (index < 0 || index >= size)
             throw new IllegalArgumentException("Set failed,illegal index.");
         Node cur = dummyHead.next;
@@ -96,7 +96,7 @@ public class LinkedList<E> {
         cur.e = e;
     }
 
-    public boolean contains(E e) {
+    public boolean contains(E e) {// O(n)
         Node cur = dummyHead.next;
         while (cur != null) {
             if (cur.e.equals(e)) {
@@ -107,7 +107,7 @@ public class LinkedList<E> {
         return false;
     }
 
-    public E remove(int index) {
+    public E remove(int index) {// O(n)
         if (index < 0 || index >= size)
             throw new IllegalArgumentException("Remove failed,illegal index.");
         Node prev = dummyHead;
@@ -121,12 +121,28 @@ public class LinkedList<E> {
         return del.e;
     }
 
-    public E removeFirst() {
+    public E removeFirst() {// O(1)
         return remove(0);
     }
 
-    public E removeLast() {
+    public E removeLast() {// O(n)
         return remove(size - 1);
+    }
+
+    // 从链表中删除元素e
+    public void removeElement(E e) {// O(n)
+        Node prev = dummyHead;
+        while (prev.next != null) {
+            if (prev.next.e.equals(e))
+                break;
+            prev = prev.next;
+        }
+        if (prev.next != null) {
+            Node delNode = prev.next;
+            prev.next = delNode.next;
+            delNode.next = null;
+            size--;
+        }
     }
 
     @Override

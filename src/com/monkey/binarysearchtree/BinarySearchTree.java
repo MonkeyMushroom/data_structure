@@ -38,6 +38,17 @@ public class BinarySearchTree<E extends Comparable<E>> {
         return size == 0;
     }
 
+    /**
+     * O(h) h为二叉树的高度，即h层
+     * 一共节点数：2^0 + 2^1 + 2^2 + … + 2^(h-1)
+     * *         = 1 * (1 - 2^h) / (1-2)
+     * *         = 2^h - 1 = n
+     * *  h = log(2)(n + 1)
+     * *    = O(log(2)n) = O(logn)
+     * *
+     * 所以，二分搜索树标准时间复杂度是O(h)，平均时间复杂度是O(logn)，
+     * 最差时间复杂度是O(n)，此时h=n，二分搜索树退化成链表，为解决这个问题需要平衡二叉树
+     */
     public void add(E e) {
         root = add(root, e);
     }
@@ -59,7 +70,7 @@ public class BinarySearchTree<E extends Comparable<E>> {
         return node;
     }
 
-    public boolean contains(E e) {
+    public boolean contains(E e) {// O(logn)
         return contains(root, e);
     }
 
@@ -244,7 +255,7 @@ public class BinarySearchTree<E extends Comparable<E>> {
     /**
      * 删除元素为e的节点
      */
-    public void remove(E e) {
+    public void remove(E e) {// O(logn)
         root = remove(root, e);
     }
 
