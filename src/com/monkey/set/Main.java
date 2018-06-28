@@ -18,7 +18,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        String filename = "src\\com\\monkey\\set\\pride-and-prejudice.txt";
+        String filename = "pride-and-prejudice.txt";
         BSTSet<String> bstSet = new BSTSet<>();
         double time1 = testSet(bstSet, filename);
         System.out.println("BST Set: " + time1 + " s");

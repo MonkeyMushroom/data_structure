@@ -26,7 +26,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        String filename = "src\\com\\monkey\\set\\pride-and-prejudice.txt";
+        String filename = "pride-and-prejudice.txt";
         BSTMap<String, Integer> bstMap = new BSTMap<>();
         double time1 = testMap(bstMap, filename);
         System.out.println("BST Map: " + time1 + " s");
