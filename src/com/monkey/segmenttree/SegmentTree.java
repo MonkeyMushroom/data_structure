@@ -84,7 +84,7 @@ public class SegmentTree<E> {
      */
     public E query(int queryL, int queryR) {// O(logn)
         if (queryL < 0 || queryL >= data.length || queryR < 0 || queryR >= data.length || queryL > queryR) {
-            throw new IllegalArgumentException("out of index");
+            throw new IllegalArgumentException("index out of bounds");
         }
         return query(0, 0, data.length - 1, queryL, queryR);
     }
@@ -112,7 +112,7 @@ public class SegmentTree<E> {
 
     public void set(int index, E e) {// O(logn)
         if (index < 0 || index >= data.length) {
-            throw new IllegalArgumentException("out of index");
+            throw new IllegalArgumentException("index out of bounds");
         }
         data[index] = e;
         set(0, 0, data.length - 1, index, e);
