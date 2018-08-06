@@ -13,7 +13,7 @@ public class BinarySearchTree<E extends Comparable<E>> {
 
     public class Node {
         public E e;
-        public Node left, right;
+        public Node left, right;//左右子节点
 
         public Node(E e) {
             this.e = e;
@@ -22,7 +22,7 @@ public class BinarySearchTree<E extends Comparable<E>> {
         }
     }
 
-    private Node root;
+    private Node root;//根节点
     private int size;
 
     public BinarySearchTree() {
@@ -211,7 +211,7 @@ public class BinarySearchTree<E extends Comparable<E>> {
     }
 
     /**
-     * 删除最小元素所在的节点，并返回该元素
+     * 删除最小元素所在的节点，并返回根节点
      */
     public E removeMin() {
         E e = minimum();
