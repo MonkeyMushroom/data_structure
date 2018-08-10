@@ -1,0 +1,315 @@
+1.良好的开发习惯
+2.独立思考的能力
+3.主动并且善于沟通
+
+1.熟悉常用的设计模式和数据结构
+2.有Android软件开发经验，熟悉Android移动端开发技术
+3.有扎实的Java语言基础，熟练掌握Android各种UI布局和控件，能够熟练自定义UI控件
+4.熟练掌握HTTP及Socket编程，对Android程序性能优化、内存优化有一定经验
+
+1.基本知识点
+2.深入知识点
+3.基本知识点的细节
+4.系统核心机制
+
+一。Activity
+与用户交互的界面
+1.生命周期
+activity的四种状态：running(可见可交互)/paused(可见不可交互)/stopped(不可见不可交互)/killed
+    启动：onCreate()创建 -> onStart()可见不可交互 -> onResume()可见可交互
+    点击Home键回到主界面：onPause()可见不可交互 -> onStop()不可见不可交互，内存吃紧情况下可能会被系统回收
+    再次回到原Activity：onRestart() -> onStart() -> onResume()
+    退出当前Activity：onPause() -> onStop() -> onDestroy()
+
+进程优先级：
+	前台(正在与用户交互的Activity或者与前台Activity绑定的Service)
+	可见(Activity可见但不可交互)
+	服务(Service服务)
+	后台(点击Home键，当前Activity退到后台，内存充裕情况下不会被回收)
+	空(优先级最低，出于缓存的目的而保留，可以被系统随时杀死)
+2.任务栈
+    系统可以通过任务栈有序的管理每一个Activity，first in last out
+3.启动模式
+    standard，标准模式
+    singleTop，栈顶复用模式，如果创建的Activity在栈顶存在，那么就不会重新创建，而是复用栈顶Activity
+    singleTask，栈内复用模式，检测Activity在任务栈中是否存在，如果存在，就把该Activity至于栈顶，
+    	其上其他Activity全部出栈销毁，并调用该Activity的onNewIntent()方法
+    singleInstance，该Activity独享一个任务栈
+3.scheme跳转协议
+    Android中的scheme是一种页面内跳转协议，是一种非常好的实现机制，通过定义自己的scheme协议，可以非常方便跳转app中的各个页面；
+通过scheme协议服务器可以定制化告诉app跳转哪个页面，可以通过通知栏消息定制化页面，可以通过H5页面跳转页面等。
+
+二。Fragment
+被称为第五大组件，有自己的生命周期，依附于Activity
+1.加载到Activity的两种方式：
+	静态加载，添加到布局文件当中
+		<Fragment ... />
+	动态加载，
+		FragmentManager manager = getFragmentManager();
+		FragmentTransaction transaction = manager.beginFragmentTransaction();
+		LeftFragment fragment = new LeftFragment();
+		transaction.add(R.id.fragment_container, fragment);
+		transaction.commit();
+2.FragmentPagerAdapter与FragmentStatePagerAdapter的区别
+	FragmentStatePagerAdapter在每次切换ViewPager的时候是回收内存的，适合页面较多的情况，
+在其onDestroyItem()方法中调用了transaction.remove()方法；FragmentPagerAdapter在destroyItem
+的时候并没有回收内存，只是把UI分离，调用了transaction.detach()方法，适合页面较少的情况。
+3.生命周期
+onAttach() -> onCreate() -> onCreateView() -> onViewCreated() -> onActivityCreated() ->
+onStart() -> onResume() -> onPause() -> onStop() -> onDestroyView() -> onDestroy() -> onDetach()
+4.Fragment与Activity通信
+	1).在Fragment调用Activity的方法：getActivity();
+	2).在Activity调用Fragment的方法：接口回调，在Fragment中创建接口，由Activity实现
+	3).在Fragment调用Fragment的方法：getActivity()中找到对应Fragment
+5.
+transaction.replace()、transaction.add()、transaction.remove()
+
+三。Service
+在后台执行长时间运行操作而没有用户界面的应用组件，不依赖于Activity
+1.Service和Thread的区别
+Service运行在主线程不能执行耗时操作，Thread子线程可以执行耗时操作
+2.启动Service的两种方式
+	1).继承Service，在Manifest文件声明Service
+	   在Activity调用startService(Intent intent)
+	   停止服务stopService(Intent intent)
+	2).继承Service，在Manifest文件声明Service
+	   创建一个实现IBinder接口的实例对象并提供公共方法给Activity调用
+	   从onBind()回调方法中返回此Binder实例
+	   在Activity中，创建ServiceConnection实现onServiceConnected()方法中接收Binder
+	   绑定服务bindService(Intent intent, ServiceConnection conn, int flags)
+	   解绑服务unbindService(ServiceConnection conn)
+
+public class LocalService extends Service{
+    private final static String TAG = "tag";
+    private int count;
+    private boolean quit;
+    private Thread thread;
+    private LocalBinder binder = new LocalBinder();
+
+    /**
+     * 创建Binder对象，返回给客户端即Activity使用，提供数据交换的接口
+     */
+    public class LocalBinder extends Binder {
+        // 声明一个方法，getService。（提供给客户端调用）
+        LocalService getService() {
+            // 返回当前对象LocalService,这样我们就可在客户端端调用Service的公共方法了
+            return LocalService.this;
+        }
+    }
+
+    /**
+     * 把Binder类返回给客户端
+     */
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.i(TAG, "Service is invoke Created");
+        thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // 每间隔一秒count加1 ，直到quit为true。
+                while (!quit) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    count++;
+                }
+            }
+        });
+        thread.start();
+    }
+
+    /**
+     * 公共方法
+     * @return
+     */
+    public int getCount(){
+        return count;
+    }
+    /**
+     * 解除绑定时调用
+     * @return
+     */
+     @Override
+    public boolean onUnbind(Intent intent) {
+        Log.i(TAG, "Service is invoke onUnbind");
+        return super.onUnbind(intent);
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.i(TAG, "Service is invoke Destroyed");
+        this.quit = true;
+        super.onDestroy();
+    }
+}
+
+//调用绑定方法
+ bindService(intent, new ServiceConnection() {
+		/**
+		 * 与服务器端交互的接口方法 绑定服务的时候被回调，在这个方法获取绑定Service传递过来的IBinder对象，
+		 * 通过这个IBinder对象，实现宿主和Service的交互。
+		 */
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			Log.d(TAG, "绑定成功调用：onServiceConnected");
+			// 获取Binder
+			LocalService.LocalBinder binder = (LocalService.LocalBinder) service;
+			mService = binder.getService();
+		}
+		/**
+		 * 当取消绑定的时候被回调。但正常情况下是不被调用的，它的调用时机是当Service服务被意外销毁时，
+		 * 例如内存的资源不足时这个方法才被自动调用。
+		 */
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			mService=null;
+		}
+	}, Service.BIND_AUTO_CREATE);
+4.生命周期
+	onCreate() 首次创建服务时，系统将调用此方法执行一次性设置程序
+	           在调用onStartCommand()和onBind()之前
+			   如果服务已经在运行，则不会调用此方法，该方法只调用一次
+	onBind() 在调用bindService()方法时执行
+	onStartCommand() 每次通过startService()方法启动Service时都会被回调
+	onUnbind() unbindService()解绑时回调
+	onDestroy() 服务销毁时的回调，可以再此进行资源回收
+
+四。Broadcast
+一种传输信息的机制，实现了不同程序之间的数据共享，只需要实现相同的action
+1.种类 普通广播 Context.sendBroadcast
+       有序广播 Context.sendOrderedBroadcast
+	   本地广播 LocalBroadcast 只在自身app内传播
+2.实现 静态注册，写在Manifest里，注册完成一直运行，Activity销毁仍能收到广播
+       动态注册，在代码中调用registerReceiver()，Activity销毁，该广播随之失效
+3.内部实现机制
+	自定义BroadcastReceiver，重写onReceive()方法
+	通过Binder机制向AMS(Activity Manager Service:负责应用程序的启动、管理和调度工作)进行注册
+	广播发送者通过Binder机制向AMS发送广播
+	AMS查找符合相应条件(IntentFilter/Permission等)的BroadcastReceiver，将广播发送到相应的消息队列中
+	消息循环执行拿到此广播，回调onReceive()方法
+4.本地广播 LocalBroadcastManager
+	使用它发送的广播只在自身app内传播，不必担心泄露隐私数据
+	其他app无法对你的app发送广播，不能接收非自身应用发送的广播，不必担心有安全漏洞可以利用
+	比系统的全局广播更加高效，因为内部使用Handler发送Message实现的，系统广播使用Binder
+	同时，使用Handler来实现，别的应用无法向我们的应用发送广播，而我们应用内发送的广播也不会离开我们的应用
+	LocalBroadcastManager内部协作主要靠两个HashMap集合：
+	<BroadcastReceiver, ArrayList<IntentFilter>> mReceivers和<String, ArrayList<ReceiverRecord>> mActons
+	还有一个ArrayList<BroadcastRecord>：mPendingBroadcasts，主要存储待接收的广播对象
+
+五。WebView
+1.坑
+	在API17之前的版本存在远程代码执行安全漏洞，该漏洞源于程序没有正确限制使用WebView.addJavascriptInterface方法，
+远程攻击者可通过使用Java Reflection反射机制利用该漏洞执行任意Java对象的方法。
+	在布局文件中的使用：WebView写在其它容器中时需要调用mRootView.removeView(mWebView);mWebView.destroy();
+防止内存泄漏问题。
+	jsbridge，一个实现Web端与Android端交互的桥，互相调用对方的方法。
+	webviewClient.onPageFinished()方法，在页面加载结束时调用，但页面操作比较复杂时可能会造成多次调用，可以使用
+webChromeClient.onProgressChanged()方法替代。
+	后台耗电，WebView加载网页会开启线程，如果没有将WebView销毁的话，这些线程就会一直在后台运行，导致应用程序耗电量居高不下。
+	WebView硬件加速导致页面渲染问题，容易出现白块或者闪烁，需要关闭硬件加速
+2.内存泄漏问题
+	WebView在一个新的线程之中执行操作，生命周期与Activity不同，导致持有Activity引用无法回收
+解决：
+	  1).开启单独进程操作WebView，涉及进程间通信
+	  2).动态添加WebView，对传入WebView的Context使用弱引用，在Activity onDestroy()时
+mRootView.removeView(mWebView);mWebView.destroy();
+
+六。Binder
+1.Linux内核的基础知识
+	进程隔离/虚拟地址空间  系统调用  binder驱动
+2.什么是Binder
+	一种跨进程的通信机制
+	对于Service进程来说，Binder指的是Binder本地对象/对于Client来说，Binder指的是Binder代理对象
+	对于传递过程而言，Binder是可以进行跨进程传递的对象
+3.为什么使用Binder
+	1.)Android使用Linux内核拥有非常多的跨进程通信机制
+	2.)性能高效
+	3.)安全，身份校验
+4.AIDL
+
+七。Handler
+	Handler通过发送和处理Message和Runnable来关联相应线程的MessageQueue
+	可以让对应的Message和Runnable在未来的某个时间点进行相应处理
+	让自己想要处理的耗时操作放在子线程，让更新ui的操作放在主线程
+1.使用
+    1.)handler.post(new Runnable(){
+        @Override
+        public void run(){
+            ...
+        }
+    })
+    2.)
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg){
+            switch(msg.what){
+                case 0:
+                    ...
+                    break;
+            }
+        }
+    }
+    Message msg = handler.obtainMessage();
+    msg.what = 0;
+    handler.sendMessage(msg);
+2.内部机制
+    Handler发送消息到MessageQueue，Looper开启循环，不断从MessageQueue中获取消息，交由Handler调用handleMessage处理消息
+3.内存泄漏
+    当使用内部类（包括匿名类）来创建Handler的时候，Handler对象会隐式地持有一个外部类对象（通常是一个Activity）的引用（不然你怎
+么可能通过Handler来操作Activity中的View？）。而Handler通常会伴随着一个耗时的后台线程（例如从网络拉取图片）一起出现，这个后台线
+程在任务执行完毕（例如图片下载完毕）之后，通过消息机制通知Handler，然后Handler把图片更新到界面。然而，如果用户在网络请求过程中
+关闭了Activity，正常情况下，Activity不再被使用，它就有可能在GC检查时被回收掉，但由于这时线程尚未执行完，而该线程持有Handler的
+引用（不然它怎么发消息给Handler？），这个Handler又持有Activity的引用，就导致该Activity无法被回收（即内存泄露），直到网络请求
+结束（例如图片下载完毕）。另外，如果你执行了Handler的postDelayed()方法，该方法会将你的Handler装入一个Message，并把这条Message
+推到MessageQueue中，那么在你设定的delay到达之前，会有一条MessageQueue -> Message -> Handler -> Activity的链，导致你的Activity
+被持有引用而无法被回收。
+    解决：
+    方法一：通过程序逻辑来进行保护。
+    1.在关闭Activity的时候停掉你的后台线程。线程停掉了，就相当于切断了Handler和外部连接的线，Activity自然会在合适的时候被回收。
+    2.如果你的Handler是被delay的Message持有了引用，那么使用相应的Handler的removeCallbacks()方法，把消息对象从消息队列移除就行了。
+    方法二：将Handler声明为静态类。
+    PS:在Java 中，非静态的内部类和匿名内部类都会隐式地持有其外部类的引用，静态的内部类不会持有外部类的引用。
+    静态类不持有外部类的对象，所以你的Activity可以随意被回收。由于Handler不再持有外部类对象的引用，导致程序不允许你在Handler中操作
+Activity中的对象了。所以你需要在Handler中增加一个对Activity的弱引用（WeakReference）。
+
+static class MyHandler extends Handler {
+    WeakReference<Activity> mWeakReference;
+    public MyHandler(Activity activity) {
+        mWeakReference = new WeakReference<Activity>(activity);
+    }
+    @Override
+    public void handleMessage(Message msg) {
+        final Activity activity = mWeakReference.get();
+        if(activity!=null) {
+            if (msg.what == 1) {
+                noteBookAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+}
+
+八。AsyncTask
+
+
+
+
+
+
+
+
+
+
+
+
+
+
