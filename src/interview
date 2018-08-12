@@ -299,12 +299,75 @@ static class MyHandler extends Handler {
 }
 
 八。AsyncTask
+封装了线程池并通过Handler发送消息，能够在UI线程和子线程之间灵活切换
+1.使用方法
+    extends AsyncTask<E1, E2, E3> 三中泛型分别为：
+        doInBackground的参数类型；
+        publishProgress的参数类型，一般为Integer；
+        doInBackground的返回值，onPostExecute的参数类型、
+    void onPreExecute()：执行在ui线程，做一些准备工作
+    E3 doInBackground(E1)：执行在后台线程，做耗时操作，在onPreExecute之后执行
+    publishProgress(E2)：发送进度，在doInBackground中调用
+    onProgressUpdate(E2)：publishProgress之后回调，更新ui
+    onPostExecute(E3)：后台任务执行完之后回调
+2.机制原理
+    AsyncTask的本质是一个静态的线程池，耗时任务都提交到静态的线程池中执行
+    线程池中的工作线程执行doInBackground方法执行异步任务
+    当人物状态改变之后，工作线程回想UI线程发送消息，AsyncTask内部的InternalHandler
+响应这些消息，并调用相关函数
+3.内存泄漏
+    非静态内部类持有外部类匿名引用，导致外部类Activity销毁时，由于内部类仍持
+有外部类引用而无法被回收
+    1).AsyncTask设置为static；
+    2).使用弱引用WeakReference；
+        private WeakReference<Activity> weakAty;
+        public MyTask(Activity activity){
+            weakAty = new WeakReference<Activity>(activity);
+        }
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            if(weakAty.get() != null) {
+                ...
+            }
+        }
+    3).在onDestroy中调用async.cancel(true)方法，该需要一个布尔值的参数，参数
+    名为mayInterruptIfRunning,意思是如果正在执行是否可以打断,如果这个值设置为
+    true，表示这个任务可以被打断，否则，正在执行的程序会继续执行直到完成。
+4.结果丢失
+    在屏幕旋转等造成Activity重新创建时AsyncTask数据丢失的问题。当Activity销毁
+并重新创建后，还在运行的AsyncTask会持有一个Activity的非法引用即之前的Activity
+实例，导致onPostExecute()没有任何作用。
+5.并行or串行
+    AsyncTask调用executeOnExecutor()方法实现异步任务并行，但是为了维护线程池
+的稳定性，一般使用串行，即调用execute()
 
+九。HandlerThread
+背景：开启Thread子线程进行耗时操作，多次创建和销毁线程是很消耗系统资源的
+HandlerThread = Handler + Thread + Looper
+1.特点：
+    本质上是一个线程类，集成了Thread；
+    有自己的内部Looper对象，可以进行Looper循环；
+    通过获取HandlerThread的Looper对象传递给Handler对象，可以在handlerMessage
+方法中执行异步任务；
+    优点是不会有堵塞，减少了对性能的消耗，缺点是不能同时进行多任务的处理，需要等待
+进行处理，处理效率较低；
+    与线程池注重并发不同，HandlerThread是一个串行队列，背后只有一个线程，线程安全。
 
-
-
-
-
+十。IntentService
+    IntentService是继承并处理异步请求的一个类，在IntentService内有一个工作线程来
+处理耗时操作，启动IntentService的方式和启动传统的Service一样，同时当任务执行完后，
+IntentService会自动停止，而不需要我们手动去控制或stopSelf()。另外，可以启动
+IntentService多次，而每一个耗时操作会以工作队列的方式在IntentService的onHandleIntent
+回调方法中执行，并且每次只会执行一个工作线程，执行完第一个再执行第二个。
+    本质是一种特殊的Service，继承自Service并且本身就是一个抽象类；
+    内部通过HandlerThread和Handler实现异步操作
+1.使用方法：
+    1).创建MyIntentService extends IntentService，实现构造方法和onHandleIntent，
+onHandleIntent为异步方法，可以执行耗时操作；
+    2).Intent intent = new Intent(this, MyIntentService.class);
+       intent.putExtra(...);
+       startService(intent);
 
 
 
