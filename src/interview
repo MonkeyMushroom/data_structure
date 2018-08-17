@@ -369,6 +369,141 @@ onHandleIntent为异步方法，可以执行耗时操作；
        intent.putExtra(...);
        startService(intent);
 
+十一。View绘制
+    measure -> layout -> draw
+1.onMeasure() 测量，从上到下进行遍历，DecorView - ViewGroup - View
+    MeasureSpec，32位的int值，前2位代表测量模式mode，后30位代表测量大小size
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            setMeasuredDimension(measureDimension(widthMeasureSpec), measureDimension(heightMeasureSpec));
+        }
+
+        private int measureDimension(int measureSpec) {
+            int result;
+            int specMode = MeasureSpec.getMode(measureSpec);
+            int specSize = MeasureSpec.getSize(measureSpec);
+            if (specMode == MeasureSpec.EXACTLY) {//精确地，代表宽高为定值或者match_parent时
+                result = specSize;
+            } else {
+                result = 2 * mRadius;
+                if (specMode == MeasureSpec.AT_MOST) {//最大地，代表宽高为wrap_content时
+                    result = Math.min(result, specSize);
+                }
+            }
+            return result;
+        }
+2.onLayout() 布局位置
+3.onDraw() 绘制
+    invalidate() 刷新，重走onDraw()
+    requestLayout() 布局发生变化，重走onLayout()
+
+十二。事件分发机制
+View是树形结构的，View可能会重叠在一起，当我们点击的地方有多个View都可以响应的时候，这个点击事件应该给谁
+Activity - PhoneWindow - DecorView - ViewGroup - View
+1.dispatchTouchEvent()：分发，由ViewGroup遍历它包含着的子View，调用每个View的dispatchTouchEvent方法
+
+2.onInterceptTouchEvent()：拦截，Activity和View没有该方法，因为Activity如果拦截了会导致下面所有视图都无响应；
+    而View作为最底层视图，不需要拦截，要么消费掉要么回传
+
+3.onTouchEvent()：消费
+
+十三。ListView
+是一个能让数据集合以动态滚动的方式展示到用户界面上的View
+1.适配器模式，保证数据和View的分离
+2.recycleBin机制
+3.优化：convertView、ViewHolder
+
+十四。git
+1.工作区 .gitignore忽略的文件类型
+2.常用命令：git init  创建git仓库
+           git status  仓库状态
+           git diff 文件名  修改的不同
+           git add 文件名  添加文件至暂存区
+           git commit  将暂存区文件提交到代码区
+           git clone 地址  从远程仓库克隆代码到本地仓库
+           git branch  查看分支
+           git checkout  切换分支
+3.主流工作流：fork/clone
+    fork - 从代码的远程仓库复制一份至自己的远程仓库
+    clone - 从自己的远程仓库复制一份至本地电脑
+    update - 更新
+    commit - 将代码提交到本地仓库
+    push - 将本地仓库代码提交到自己远程仓库
+    pull request - 将自己远程仓库提交到项目远程仓库，仓库管理员检查代码并merge合并
+
+十五。proguard
+用于压缩、优化、混淆代码，移除代码中的无用类、字段、方法和属性
+工作原理：EntryPoint - 一种标志，在proguard过程中不会被处理的类或者方法
+
+十六。OkHttp
+1.使用：
+    1).创建OkHttpClient对象：OkHttpClient client = new OkHttpClient();
+    2).创建Request对象：Request request = Request.Builder().url(Constants.BASE_URL).build();
+       可以设置url、header、body等
+    3).同步请求：Response response = client.newCall(request).execute();
+                sout(response.body().toString());
+    4).异步请求：client.newCall(request).enqueue(new Callback(){
+                    @Override
+                    public void onFailure(Exception e){e.printStackTrace()}
+
+                    @Override
+                    public void onResponse(Call call, Response response){
+                        sout(response.body().toString());
+                    }
+                });
+2.源码
+        创建请求Call，发起同步/异步请求，对于同步和异步请求，唯一的区别就是异步请求会放在线程池（ThreadPoolExecutor）中去执行，
+    而同步请求则会在当前线程中执行，注意：同步请求会阻塞当前线程。如果是异步请求，会判断正在执行的请求总数是否是<64，且单个host
+    请求是否<5，如果为true则将call放入runningAsyncCalls集合中，否则放入readyAsyncCalls中；如果是同步请求则放入runningSyncCalls
+    中。以上三个集合是Deque类型，代表双端队列。一个请求会经过OkHttp的若干个拦截器进行处理，每一个拦截器都会完成一个功能模块，一个
+    Request经过拦截器链InterceptorChain的处理之后，会得到最终的Response，并移除该call。
+
+十七。Retrofit
+1.使用：
+    1).创建网络请求接口：
+        public interface HomeApi{
+            @Get({type})
+            Call<InfoBean> getInfoList(@Path("type") String type);
+
+            @FormUrlEncoded
+            @Post(collect/info)
+            @Headers("Content-Type:application/x-www-form-urlencoded; charset=utf-8")
+            Call<CollectBean> getCollectList(@Field("type") String type);
+        }
+    2).创建Retrofit对象：Retrofit retrofit = new Retrofit.Builder().baseUrl(Constants.BASE_URL).build();
+    3).创建接口对象：HomeApi api = retrofit.create(HomeApe.class);
+    4).创建请求Call对象：retrofit2.Call<InfoBean> call = api.getInfoList("info");
+    5).发起请求：call.enqueue(new retrofit2.Callback<InfoBean>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<InfoBean> call, retrofit2.Response<InfoBean> response){
+                        sout(response.body().toString());
+                    }
+                    @Override
+                    public void onFailure(retrofit2.Call<InfoBean> call, Throwable t){
+                    }
+                })
+2.源码
+    动态代理：通过method把它转换成ServiceMethod，然后通过serviceMethod和args获取到okHttpCall对象，最后再把okHttpCall
+             进一步封装并返回Call对象
+
+十八。Volley
+1.使用：适合数据量小、请求频繁的接口
+    RequestQueue queue = Volley.newRequestQueue(this);
+    StringRequest request = new StringRequest(url, new Response.Listener() {
+            @Override
+            public void onResponse(String response) {
+                sout(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error){
+            }
+        });
+    queue.add(request);
+
+
+
+
 
 
 
