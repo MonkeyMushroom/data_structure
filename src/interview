@@ -500,9 +500,49 @@ Activity - PhoneWindow - DecorView - ViewGroup - View
             }
         });
     queue.add(request);
+2.根据优先级将请求添加到缓存队列，缓存调度线程从缓存队列取出一个请求，若存在，则从缓存中读取响应并解析，将解析后的响应传递到主线程；
+若不存在，网络调度线程从网络队列中取出一个请求，http请求传输、解析响应、写缓存，将解析后的响应传递到主线程。
+
+十九。ButterKnife
+1.使用：依托java的注解机制来实现辅助代码生成的框架
+@BindView(R.id.tv)
+TextView tv;
+@OnClick(R.id.btn)
+public void onClick(){}
+@OnClick({R.id.btn1, R.id.btn2})
+public void onClick(View v){}
+@OnPageChange()
+@OnTextChange()
+...
+其中View不能使用private或者static修饰，否则就不能使用注解的方式而影响性能
+2.原理：Annotation Processing注解处理技术，编译时解析注解生成新的java代码，编译成java字节码，不同于反射影响运行时的效率
+    1).开始它会扫描java代码中所有的ButterKnife注解
+    2).ButterKnifeProcessor -> <className>$$ViewBinder
+    3).调用bind方法加载生成的ViewBinder类，动态注入activity中的所有注解的属性和监听
+
+二十。Glide
+Glide.with(context).load(url).into(iv);
 
 
 
+二十一。ANR&OOM
+1.Application Not Responding，5秒无响应（在广播中是10秒），在主线程做了耗时（网络请求、数据库读取等）操作
+如何解决：使用AsyncTask处理耗时IO操作；
+         使用Thread/HandlerThread提高优先级
+         使用Handler来处理工作线程的耗时任务
+         Activity的onCreate()和onResume()会调用尽量避免耗时的代码
+2.Out Of Memory，内存溢出，当前占用的内存加上我们申请的内存资源超过了Dalvik虚拟机的最大内存限制
+内存泄漏：内部类持有外部类引用，导致外部类对象无法被回收，可使用内存越来越少，严重的导致内存溢出
+内存抖动：短时间内大量对象被创建，触发GC垃圾回收，大量对象被销毁
+如何解决：有关bitmap - 图片显示、及时释放内存、图片压缩、inBitmap属性提高bitmap的分配和释放的效率、捕获异常
+         其他 - ListView复用和lru缓存、避免在onDraw()中创建对象、谨慎使用多进程
+
+二十二。Bitmap
+1.recycle
+2.LRU算法，清理最近最少使用的缓存对象，内部使用LinkedHashMap来实现，提供了get/set方法完成缓存的添加和获取
+3.缩略图、三级缓存（网络、内存、本地）
+
+二十三。UI卡顿
 
 
 
