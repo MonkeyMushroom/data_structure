@@ -646,6 +646,48 @@ Glide.with(context).load(url).into(iv);
     Parcelable是Android特有的序列化方式，在使用内存的时候性能更好，但不能使用在要将数据存储在磁盘上的情况
 4.避免在ui线程中做繁重的操作
 
+二十八。架构设计
+MVC:Model(数据请求) View(视图布居xml) Controller(控制器Activity) 耦合性低，可扩展性好，模块职责划分明确
+MVP:Model(业务逻辑和数据模型) View(Activity，负责View的绘制和用户交互) Presenter(负责View和Model间的交互)
+MVVM:Model(实体模型) View(对应Activity和xml，负责View的绘制和用户交互) ViewModel(负责View和Model间的交互，负责业务逻辑)
+
+二十九。插件化
+业务逻辑越来越复杂，模块分离和团队分离
+1.动态加载apk：类加载器DexClassLoader，通过反射获得对象的方法
+2.资源加载：AssetManager通过反射调用方法
+3.代码加载：绑定生命周期，反射
+
+三十。热更新
+1.流程：线上检测到严重的crash，拉出bugfix分支并在分支上修复问题，jenkins构建和补丁生成，app拉取补丁文件，将bugfix代码合到master上
+2.主流热更新框架：Dexposed、AndFix、Nuwa
+3.原理：
+    类加载机制：
+        PathClassLoader：加载系统类、应用类
+        DexClassLoader：加载dex文件
+    热修复机制：
+        dexElements数组，ClassLoader会遍历这个数组，把修复好的dex类文件放到dexElements数组最前方优先加载，就不会加载有问题的dex文件
+
+三十一。进程保活
+1.优先级：
+    Foreground process 前台进程
+    Visible precess 可见进程
+    Service precess 服务进程
+    Background process 后台进程
+    Empty precess 空进程
+2.进程回收策略
+    Low memory killer：通过一些比较复杂的评分机制，对进程进行打分，然后将分数高的进程判定为bad进程，杀死并释放内存
+    OOM_ODJ：判别进程的优先级，值越小优先级越高，越不会被回收；值越大优先级越低，越容易被回收
+3.保活方案
+    系统广播拉活，系统Service机制拉活，JobScheduler机制拉活，账号同步机制拉活
+
+三十二。UniversalImageLoader
+DisplayImageOptions options = new DisplayImageOptions.Builder()
+        .cacheImMemory(true)
+        .cacheOnDisk(true)
+        .bitmapConfig(Bitmap.Config.RGB_565)
+        .build();
+ImageLoader.getInstance().displayImage(url, iv, options);
+
 
 
 
