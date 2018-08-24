@@ -688,6 +688,15 @@ DisplayImageOptions options = new DisplayImageOptions.Builder()
         .build();
 ImageLoader.getInstance().displayImage(url, iv, options);
 
+三十三。lint检查
+Android Lint是一个静态代码分析工具，对项目中潜在的bug、可优化的代码、安全性、性能、可用性、可访问性、国际化等进行检查
+如何配置及，自定义lint
+
+三十四。Kotlin
+是一种基于JVM的语言，是对Java的一种扩展，支持函数式编程，Kotlin类与Java类能相互调用
+
+
+
 
 
 
