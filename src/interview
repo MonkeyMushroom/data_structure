@@ -695,6 +695,61 @@ Android Lint是一个静态代码分析工具，对项目中潜在的bug、可�
 三十四。Kotlin
 是一种基于JVM的语言，是对Java的一种扩展，支持函数式编程，Kotlin类与Java类能相互调用
 
+三十五。IO
+1.ip地址和端口号、tcp/udp协议、URL、InetAddress
+2.Socket
+    1).客户端连接：创建Socket对象，指定服务器地址和端口号；连接建立后通过输出流向服务器端发送请求信息；通过输入流获取服务器端响应的信息；关闭响应资源
+    Socket socket = new Socket("localhost", 10086);
+    OutputStream os = socket.getOutputStream();//通过输出流向服务器端发送请求信息
+    PrintWriter pw = new PrintWriter(os);//将输出流包装成打印流
+    pw.write("用户名：123；密码：123");
+    pw.flush();
+    socket.shutdownOutput();
+    InputStream is = socket.getInputStream();//通过输入流获取服务器端响应的信息
+    BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    String info;
+    while(info = br.readLine() != null){
+        sout("我是客户端，服务端说：" + info);
+    }
+    br.close();//关闭资源
+    is.close();
+    pw.close();
+    os.close();
+    socket.close();
+    2).服务端连接：创建ServerSocket对象，绑定监听端口；通过accept()方法监听客户端请求；连接建立后，通过输入流读取客户端发送的请求
+        信息；通过输出流向客户端发送信息；关闭相关资源
+    ServerSocket serverSocket = new ServerSocket(10086)//1024-65535中的某个端口，只要没被占用，一般都会创建成功
+    Socket socket = serverSocket.accept();
+    InputStream is = socket.getInputStream();//通过输入流读取客户端发送的信息
+    InputStreamReader isr = new InputStreamReader(is);
+    BufferedReader br = new BufferedReader(isr);
+    String info;
+    while(info = br.readLine() != null){
+        sout("我是服务器，客户端说：" + info);
+    }
+    socket.shutdownOutput();
+    OutputStream os = socket.getOutputStream();
+    PrintWriter pw = new PrintWriter(os);
+    pw.write("欢迎欢迎，热烈欢迎！");
+    pw.flush();
+    pw.close();//关闭资源
+    os.close();
+    br.close();
+    isr.close();
+    is.close();
+    socket.close();
+    serverSocket.close();
+3.java的I/O接口：
+    1).基于字节操作的I/O接口
+    2).基于字符操作的I/O接口
+    3).基于磁盘操作的I/O接口
+    4).基于网络操作的I/O接口
+4.BIO/NIO通信模型
+
+
+
+
+
 
 
 
