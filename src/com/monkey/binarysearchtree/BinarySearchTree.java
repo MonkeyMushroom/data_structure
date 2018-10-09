@@ -161,6 +161,7 @@ public class BinarySearchTree<E extends Comparable<E>> {
 
     /**
      * 层序遍历，一层一层的遍历（又叫广度优先遍历，而前中后序遍历又叫深度优先遍历），借助队列
+     * 意义：更快的找到问题的解；常用于算法设计中-最短路径
      */
     public void levelOrder() {
         Queue<Node> queue = new LinkedList<>();
@@ -191,14 +192,13 @@ public class BinarySearchTree<E extends Comparable<E>> {
         if (node.left == null) {
             return node;
         }
-        return minimum(node.left);
+        return minimum(node.left);//最左节点就是最小节点
     }
 
     // 寻找二分搜索树的最大元素
     public E maximum() {
         if (size == 0)
             throw new IllegalArgumentException("BST is empty");
-
         return maximum(root).e;
     }
 
@@ -206,8 +206,7 @@ public class BinarySearchTree<E extends Comparable<E>> {
     private Node maximum(Node node) {
         if (node.right == null)
             return node;
-
-        return maximum(node.right);
+        return maximum(node.right);//最右节点就是最大节点
     }
 
     /**
@@ -287,7 +286,7 @@ public class BinarySearchTree<E extends Comparable<E>> {
             Node successor = minimum(node.right);
             successor.right = removeMin(node.right);
             successor.left = node.left;
-            node.left = null;
+            node.left = node.right = null;
             return successor;
         }
     }
