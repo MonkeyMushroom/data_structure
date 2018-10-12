@@ -2,8 +2,6 @@ package com.monkey.heap;
 
 import com.monkey.array.Array;
 
-import java.util.LinkedList;
-
 /**
  * 二叉堆，是一棵完全二叉树，把元素顺序排列成树的形状
  * 并且某个节点的值总是不大于其父节点的值，称为最大堆（相应的也可以定义最小堆），根节点为最大值（最小值）
