@@ -2,6 +2,8 @@ package com.monkey.heap;
 
 import com.monkey.array.Array;
 
+import java.util.LinkedList;
+
 /**
  * 二叉堆，是一棵完全二叉树，把元素顺序排列成树的形状
  * 并且某个节点的值总是不大于其父节点的值，称为最大堆（相应的也可以定义最小堆），根节点为最大值（最小值）
@@ -27,7 +29,7 @@ public class MaxHeap<E extends Comparable<E>> {
      */
     public MaxHeap(E[] arr) {
         data = new Array<>(arr);
-        //从最后一个叶子结点的父节点开始，循环下沉
+        //从最后一个叶子结点的父节点开始，循环下沉 O(n)
         for (int i = parent(data.getSize() - 1); i >= 0; i--) {
             siftDown(i);
         }
@@ -79,7 +81,7 @@ public class MaxHeap<E extends Comparable<E>> {
      *
      * @param k 添加的元素的索引
      */
-    private void siftUp(int k) {
+    private void siftUp(int k) { //O(logn)
         //该元素父节点的值小于该元素的值
         while (k > 0 && data.get(parent(k)).compareTo(data.get(k)) < 0) {
             data.swap(k, parent(k));//该元素与其父节点交换位置
@@ -113,7 +115,7 @@ public class MaxHeap<E extends Comparable<E>> {
      *
      * @param k 根节点索引
      */
-    private void siftDown(int k) {
+    private void siftDown(int k) { //O(logn)
         while (leftChild(k) < data.getSize()) {//左子节点没越界
             int j = leftChild(k);
             //右子节点没越界，并且比左子节点大
