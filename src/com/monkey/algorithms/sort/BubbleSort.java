@@ -1,5 +1,8 @@
 package com.monkey.algorithms.sort;
 
+/**
+ * 冒泡排序
+ */
 public class BubbleSort {
     public static void main(String[] args) {
         int[] arr = new int[]{8, 6, 2, 3, 1, 5, 7, 4};
