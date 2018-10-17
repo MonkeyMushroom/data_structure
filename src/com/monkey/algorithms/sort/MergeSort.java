@@ -1,55 +1,66 @@
 package com.monkey.algorithms.sort;
 
-import java.util.Arrays;
-
 /**
  * 归并排序
  */
 public class MergeSort {
     public static void main(String[] args) {
         int[] arr = new int[]{8, 6, 2, 3, 1, 5, 7, 4};
-        mergeSort(arr, 0, arr.length - 1);
+        mergeSort(arr, arr.length);
         for (int a : arr) {
             System.out.print(a + " ");
         }
     }
 
-    /**
-     * 递归使用归并排序，对arr[l...r]的范围进行排序
-     */
-    private static void mergeSort(int[] arr, int l, int r) {
-        if (l >= r) {
-            return;
-        }
-        int mid = (l + r) / 2;
-        mergeSort(arr, l, mid);
-        mergeSort(arr, mid + 1, r);
-        merge(arr, l, mid, r);
+    // 归并排序算法, a是数组，n表示数组大小
+    public static void mergeSort(int[] a, int n) {
+        mergeSortInternally(a, 0, n-1);
     }
 
-    /**
-     * 将arr[l...mid]和arr[mid...r]两部分进行归并
-     */
-    private static void merge(int[] arr, int l, int mid, int r) {
-        int[] aux = Arrays.copyOfRange(arr, l, r + 1);
+    // 递归调用函数
+    private static void mergeSortInternally(int[] a, int p, int r) {
+        // 递归终止条件
+        if (p >= r) return;
 
-        // 初始化，i指向左半部分的起始索引位置l；j指向右半部分起始索引位置mid+1
-        int i = l, j = mid + 1;
-        for (int k = l; k <= r; k++) {
+        // 取p到r之间的中间位置q
+        int q = (p+r)/2;
+        // 分治递归
+        mergeSortInternally(a, p, q);
+        mergeSortInternally(a, q+1, r);
 
-            if (i > mid) {  // 如果左半部分元素已经全部处理完毕
-                arr[k] = aux[j - l];
-                j++;
-            } else if (j > r) {   // 如果右半部分元素已经全部处理完毕
-                arr[k] = aux[i - l];
-                i++;
-            } else if (aux[i - l] < aux[j - l]) {  // 左半部分所指元素 < 右半部分所指元素
-                arr[k] = aux[i - l];
-                i++;
-            } else {  // 左半部分所指元素 >= 右半部分所指元素
-                arr[k] = aux[j - l];
-                j++;
+        // 将A[p...q]和A[q+1...r]合并为A[p...r]
+        merge(a, p, q, r);
+    }
+
+    private static void merge(int[] a, int p, int q, int r) {
+        int i = p;
+        int j = q+1;
+        int k = 0; // 初始化变量i, j, k
+        int[] tmp = new int[r-p+1]; // 申请一个大小跟a[p...r]一样的临时数组
+        while (i<=q && j<=r) {
+            if (a[i] <= a[j]) {
+                tmp[k++] = a[i++]; // i++等于i:=i+1
+            } else {
+                tmp[k++] = a[j++];
             }
+        }
+
+        // 判断哪个子数组中有剩余的数据
+        int start = i;
+        int end = q;
+        if (j <= r) {
+            start = j;
+            end = r;
+        }
+
+        // 剩余的数据是排好序的，可以直接拷贝到临时数组tmp
+        while (start <= end) {
+            tmp[k++] = a[start++];
+        }
+
+        // 将tmp中的数组拷贝回a[p...r]
+        for (i = 0; i <= r-p; ++i) {
+            a[p+i] = tmp[i];
         }
     }
 }
