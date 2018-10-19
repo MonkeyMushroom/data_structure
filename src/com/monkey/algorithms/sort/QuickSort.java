@@ -21,23 +21,21 @@ public class QuickSort {
     // 对arr[l...r]部分进行partition分区操作
     // 返回p, 使得arr[l...p-1] < arr[p] ; arr[p+1...r] > arr[p]
     private static int partition(int[] arr, int l, int r) {
-        int v = arr[l];
+        int v = arr[l];//将首位当做分区标志点
         int j = l; // arr[l+1...j] < v ; arr[j+1...i) > v
         for (int i = l + 1; i <= r; i++) {
             if (arr[i] < v) {
+                swap(arr, j + 1, i);
                 j++;
-                swap(arr, j, i);
             }
         }
-
         swap(arr, l, j);
-
         return j;
     }
 
     private static void swap(int[] arr, int i, int j) {
-        int t = arr[i];
+        int temp = arr[i];
         arr[i] = arr[j];
-        arr[j] = t;
+        arr[j] = temp;
     }
 }
